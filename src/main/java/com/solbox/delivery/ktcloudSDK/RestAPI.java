@@ -159,6 +159,7 @@ public class RestAPI {
         int statusCode = httpResponse.getStatusLine().getStatusCode();
         String responseBody = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
         System.out.println(statusCode + " " + responseBody);
+        ServerInformation serverInformation = new ServerInformation();
         JSONObject result = new JSONObject();
         result.put("statusCode", statusCode);
         result.put("response",  responseBody);
@@ -184,7 +185,8 @@ public class RestAPI {
         int statusCode = response.getStatusLine().getStatusCode();
 
         String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8");
-        System.out.println(statusCode + " " + responseBody);
+        //System.out.println(statusCode + " " + responseBody);
+        ServerInformation serverInformation = new ServerInformation();
         JSONObject result = new JSONObject();
         result.put("statusCode", statusCode);
         result.put("response", responseBody);
@@ -209,7 +211,8 @@ public class RestAPI {
         int statusCode = response.getStatusLine().getStatusCode();
 
         String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8");
-        System.out.println(statusCode + " " + responseBody);
+        //System.out.println(statusCode + " " + responseBody);
+        //ServerInformation serverInformation = new ServerInformation();
         String projectID = ResponseParser.projectIDParser(responseBody);
 
         JSONObject result = new JSONObject();

@@ -8,6 +8,7 @@ public class ServerInformation {
 	static private String firewallJobId="";
 	static private String projectID="";
 
+	static private String log="";
 //	public ServerInformation(String VmId, String volumeID, String publicIP_ID,
 //			String staticNAT_ID, String projectID, String firewallJobId) {
 //		this.VmId = VmId;
@@ -19,7 +20,17 @@ public class ServerInformation {
 //		//this.networkID=networkID;
 //	}
 
-	
+	public void setLog(String log){
+		this.log = this.log + System.lineSeparator() + log;
+	}
+
+	public void initLog(){
+		this.log = "";
+	}
+
+	public String getLog(){
+		return this.log;
+	}
 	public String getVmId() {
 		return VmId;
 	}

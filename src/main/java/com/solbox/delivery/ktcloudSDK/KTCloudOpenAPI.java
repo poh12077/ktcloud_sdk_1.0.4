@@ -65,6 +65,7 @@ public class KTCloudOpenAPI {
             System.out.println("Server creation has started");
 
             ServerInformation serverInformation = new ServerInformation();
+            serverInformation.initLog();
             // token
             result = RestAPI.post(getToken_URL, RequestBody.getToken(accountId, accountPassword), timeout);
             String token = ResponseParser.statusCodeParser(result);
@@ -173,7 +174,7 @@ public class KTCloudOpenAPI {
 //        JSONObject conf = new JSONObject(confString);
 //        JSONObject http = conf.getJSONObject("http");
 //        int timeout = http.getInt("timeout");
-
+        serverInformation.initLog();
         System.out.println("Server deletion has started");
         // token
         String response = RestAPI.post(getToken_URL, RequestBody.getToken(accountId,accountPassword), 10);
