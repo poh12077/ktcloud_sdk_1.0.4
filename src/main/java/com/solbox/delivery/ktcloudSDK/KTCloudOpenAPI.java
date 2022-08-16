@@ -33,38 +33,44 @@ public class KTCloudOpenAPI {
     static final String POST = "POST";
     //static final int timeout = 10; //sec
 
-    public static ServerInformation createServer(String serverName, String confPath) throws Exception {
+    public static ServerInformation createServer(String serverName, String serverImage, String specs, int timeout, String accountId, String accountPassword,
+                                                 String networkId, String destinationNetworkId, String destinationNetworkAddress  ) throws Exception {
         try {
             String result;
+            String protocol = "ALL";
+            String startPort="0";
+            String endPort="65535";
+            String sourceNetworkId="6b812762-c6bc-4a6d-affb-c469af1b4342";
+
             //String VmImage_nginx = "fab16e16-5d53-4e00-892f-bec4b10079bb";
-            String networkId = "71655962-3e67-42d6-a17d-6ab61a435dfe";
-            //read config
-            String confString = Etc.read(confPath);
-            JSONObject conf = new JSONObject(confString);
-            JSONObject http = conf.getJSONObject("http");
-            int timeout = http.getInt("timeout");
-            JSONObject image = conf.getJSONObject("image");
-            String VmImage_complete1 = image.getString("vm");
-            JSONObject specs = conf.getJSONObject("specs");
-            String core8_ram16 = specs.getString("core8_ram16");
-            //firewall parameter
-            JSONObject firewall = conf.getJSONObject("firewall");
-            String startPort = firewall.getString("startPort");
-            String endPort = firewall.getString("endPort");
-            String sourceNetworkId = firewall.getString("sourceNetworkId");
-            String destinationNetworkAddress = firewall.getString("destinationNetworkAddress");
-            String protocol = firewall.getString("protocol");
-            String destinationNetworkId = firewall.getString("destinationNetworkId");
+
+//            //read config
+//            String confString = Etc.read(confPath);
+//            JSONObject conf = new JSONObject(confString);
+//            JSONObject http = conf.getJSONObject("http");
+//            int timeout = http.getInt("timeout");
+//            JSONObject image = conf.getJSONObject("image");
+//            String VmImage_complete1 = image.getString("vm");
+//            JSONObject specs = conf.getJSONObject("specs");
+//            String core8_ram16 = specs.getString("core8_ram16");
+//            //firewall parameter
+//            JSONObject firewall = conf.getJSONObject("firewall");
+//            String startPort = firewall.getString("startPort");
+//            String endPort = firewall.getString("endPort");
+//            String sourceNetworkId = firewall.getString("sourceNetworkId");
+//            String destinationNetworkAddress = firewall.getString("destinationNetworkAddress");
+//            String protocol = firewall.getString("protocol");
+//            String destinationNetworkId = firewall.getString("destinationNetworkId");
 
             System.out.println("Server creation has started");
 
             ServerInformation serverInformation = new ServerInformation();
             // token
-            result = RestAPI.post(getToken_URL, RequestBody.getToken(), timeout);
+            result = RestAPI.post(getToken_URL, RequestBody.getToken(accountId, accountPassword), timeout);
             String token = ResponseParser.statusCodeParser(result);
             String projectId = ResponseParser.getProjectIdFromToken(result);
             serverInformation.setProjectID(projectId);
-            String vmId = ResourceHandler.getVm(getVm_URL, token, serverName, VmImage_complete1, core8_ram16, timeout);
+            String vmId = ResourceHandler.getVm(getVm_URL, token, serverName, serverImage, specs, timeout);
             serverInformation.setVmId(vmId);
             String publicIpId = ResourceHandler.getPublicIp(getIP_URL, token, timeout);
             serverInformation.setPublicIP_ID(publicIpId);
@@ -74,7 +80,7 @@ public class KTCloudOpenAPI {
                 vmPrivateIp = ResponseParser.lookupVmPrivateIp(VmDetail_URL, token, vmId, timeout);
             } else {
                 System.out.println("vm creation error");
-                deleteServer(serverInformation, confPath);
+                deleteServer(serverInformation, timeout, accountId, accountPassword);
                 throw new Exception();
             }
             String staticNatId = ResourceHandler.setStaticNat(setStaticNAT_URL, token, networkId, vmPrivateIp, publicIpId, timeout);
@@ -87,46 +93,51 @@ public class KTCloudOpenAPI {
             return serverInformation;
         } catch (Exception e) {
             ServerInformation serverInformation = new ServerInformation();
-            KTCloudOpenAPI.deleteServer(serverInformation,confPath);
+            KTCloudOpenAPI.deleteServer(serverInformation, timeout, accountId, accountPassword);
             throw new Exception();
         }
     }
 
-    public static ServerInformation createServer(String serverName, String volumeName, String confPath) throws Exception {
+    public static ServerInformation createServer(String serverName, String volumeName, String serverImage, String volumeImage, String specs, int timeout, String accountId, String accountPassword,
+                                                 String networkId, String destinationNetworkId, String destinationNetworkAddress) throws Exception {
         try {
             String result;
+            String protocol = "ALL";
+            String startPort="0";
+            String endPort="65535";
+            String sourceNetworkId="6b812762-c6bc-4a6d-affb-c469af1b4342";
+
             //String VmImage_nginx = "fab16e16-5d53-4e00-892f-bec4b10079bb";
-            String networkId = "71655962-3e67-42d6-a17d-6ab61a435dfe";
-            //read conf
-            String confString = Etc.read(confPath);
-            JSONObject conf = new JSONObject(confString);
-            JSONObject http = conf.getJSONObject("http");
-            int timeout = http.getInt("timeout");
-            JSONObject image = conf.getJSONObject("image");
-            String VmImage_complete1 = image.getString("vm");
-            String volumeImageId = image.getString("volume");
-            JSONObject specs = conf.getJSONObject("specs");
-            String core8_ram16 = specs.getString("core8_ram16");
-            //firewall parameter
-            JSONObject firewall = conf.getJSONObject("firewall");
-            String startPort = firewall.getString("startPort");
-            String endPort = firewall.getString("endPort");
-            String sourceNetworkId = firewall.getString("sourceNetworkId");
-            String destinationNetworkAddress = firewall.getString("destinationNetworkAddress");
-            String protocol = firewall.getString("protocol");
-            String destinationNetworkId = firewall.getString("destinationNetworkId");
+//            //read conf
+//            String confString = Etc.read(confPath);
+//            JSONObject conf = new JSONObject(confString);
+//            JSONObject http = conf.getJSONObject("http");
+//            int timeout = http.getInt("timeout");
+//            JSONObject image = conf.getJSONObject("image");
+//            String VmImage_complete1 = image.getString("vm");
+//            String volumeImageId = image.getString("volume");
+//            JSONObject specs = conf.getJSONObject("specs");
+//            String core8_ram16 = specs.getString("core8_ram16");
+//            //firewall parameter
+//            JSONObject firewall = conf.getJSONObject("firewall");
+//            String startPort = firewall.getString("startPort");
+//            String endPort = firewall.getString("endPort");
+//            String sourceNetworkId = firewall.getString("sourceNetworkId");
+//            String destinationNetworkAddress = firewall.getString("destinationNetworkAddress");
+//            String protocol = firewall.getString("protocol");
+//            String destinationNetworkId = firewall.getString("destinationNetworkId");
 
             System.out.println("Server creation has started");
 
             ServerInformation serverInformation = new ServerInformation();
             // token
-            result = RestAPI.post(getToken_URL, RequestBody.getToken(), timeout);
+            result = RestAPI.post(getToken_URL, RequestBody.getToken(accountId,accountPassword), timeout);
             String token = ResponseParser.statusCodeParser(result);
             String projectId = ResponseParser.getProjectIdFromToken(result);
             serverInformation.setProjectID(projectId);
-            String vmId = ResourceHandler.getVm(getVm_URL, token, serverName, VmImage_complete1, core8_ram16, timeout);
+            String vmId = ResourceHandler.getVm(getVm_URL, token, serverName, serverImage, specs, timeout);
             serverInformation.setVmId(vmId);
-            String volumeId = ResourceHandler.getVolume(getVolume_URL, token, volumeName, volumeImageId, projectId, timeout);
+            String volumeId = ResourceHandler.getVolume(getVolume_URL, token, volumeName, volumeImage, projectId, timeout);
             serverInformation.setVolumeID(volumeId);
             String publicIpId = ResourceHandler.getPublicIp(getIP_URL, token, timeout);
             serverInformation.setPublicIP_ID(publicIpId);
@@ -135,7 +146,7 @@ public class KTCloudOpenAPI {
                 ResourceHandler.connectVmAndVolume(connectVmAndVolume_URL, token, vmId, volumeId, timeout);
             } else {
                 System.out.println("vm creation error");
-                deleteServer(serverInformation, confPath);
+                deleteServer(serverInformation, timeout, accountId, accountPassword);
                 throw new Exception();
             }
 
@@ -150,22 +161,22 @@ public class KTCloudOpenAPI {
             return serverInformation;
         } catch (Exception e) {
             ServerInformation serverInformation = new ServerInformation();
-            KTCloudOpenAPI.deleteServer(serverInformation,confPath);
+            KTCloudOpenAPI.deleteServer(serverInformation, timeout,accountId,accountPassword);
             throw new Exception();
         }
     }
 
 
-    public static String deleteServer(ServerInformation serverInformation,String confPath) throws Exception {
+    public static String deleteServer(ServerInformation serverInformation, int timeout, String accountId, String accountPassword) throws Exception {
         //read conf
-        String confString = Etc.read(confPath);
-        JSONObject conf = new JSONObject(confString);
-        JSONObject http = conf.getJSONObject("http");
-        int timeout = http.getInt("timeout");
+//        String confString = Etc.read(confPath);
+//        JSONObject conf = new JSONObject(confString);
+//        JSONObject http = conf.getJSONObject("http");
+//        int timeout = http.getInt("timeout");
 
         System.out.println("Server deletion has started");
         // token
-        String response = RestAPI.post(getToken_URL, RequestBody.getToken(), 10);
+        String response = RestAPI.post(getToken_URL, RequestBody.getToken(accountId,accountPassword), 10);
         String token = ResponseParser.statusCodeParser(response);
         boolean isVmDeleleted = false;
         boolean isVolumeDeleleted = false;
@@ -191,7 +202,7 @@ public class KTCloudOpenAPI {
         return result.toString();
     }
 
-    public static void init(String confPath) throws Exception {
+    public static void init(String confPath, String accountId, String accountPassword) throws Exception {
         //read conf
         String confString = Etc.read(confPath);
         JSONObject conf = new JSONObject(confString);
@@ -200,7 +211,7 @@ public class KTCloudOpenAPI {
 
         String result;
         String response;
-        result = RestAPI.request(getToken_URL, POST, RequestBody.getToken());
+        result = RestAPI.request(getToken_URL, POST, RequestBody.getToken(accountId,accountPassword) );
         String token = ResponseParser.statusCodeParser(result);
         String projectID = ResponseParser.getProjectIdFromToken(result);
 

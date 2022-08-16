@@ -32,7 +32,7 @@ public class RequestBody {
 		return finalJsonObject.toString();
 	}
 
-	static String getToken() throws JSONException {
+	static String getToken(String accountId, String accountPassword) throws JSONException {
 		JSONObject finalJsonObject = new JSONObject();
 		JSONObject auth = new JSONObject();
 		JSONObject identity = new JSONObject();
@@ -45,13 +45,13 @@ public class RequestBody {
 
 		domain.put("id", "default");
 		user.put("domain", domain);
-		user.put("name", "infra.op@solbox.com");
-		user.put("password", "xJd*Qv*cBXpd7qX");
+		user.put("name", accountId);
+		user.put("password", accountPassword);
 		password.put("user", user);
 		methods.put("password");
 		identity.put("methods", methods);
 		identity.put("password", password);
-		project.put("name", "infra.op@solbox.com");
+		project.put("name", accountId);
 		project.put("domain", domain);
 		scope.put("project", project);
 		auth.put("scope", scope);
