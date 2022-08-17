@@ -11,4 +11,10 @@ public class Etc {
         String file = new String(data);
         return file;
     }
+
+    static void check(String id) throws Exception {
+        if ( id == null || id.equals("") ){
+            throw new Exception();
+        }
+    }
 }

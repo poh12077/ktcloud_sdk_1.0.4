@@ -21,22 +21,23 @@ public class ResponseParser {
 
 	static String statusCodeParser(String result) throws Exception {
 		JSONObject jsonResult = new JSONObject(result);
-		if ( 400 <= jsonResult.getInt("statusCode") && jsonResult.getInt("statusCode") <= 500 ) {
+		if ( 400 <= jsonResult.getInt("statusCode") && jsonResult.getInt("statusCode") < 600 ) {
 			throw new Exception();
 		} else {
 			return jsonResult.getString("response");
 		}
 	}
 
-	static boolean statusCodeParser(String result, String successLog, String failLog) throws Exception {
+	static boolean statusCodeParserInDeletion(String result, String successLog, String failLog) throws Exception {
 		JSONObject jsonResult = new JSONObject(result);
-		if ( 400 <= jsonResult.getInt("statusCode") && jsonResult.getInt("statusCode") <= 500 ) {
-			System.out.println( jsonResult.getString("response") );
+		if ( 400 <= jsonResult.getInt("statusCode") && jsonResult.getInt("statusCode") < 600 ) {
+			//System.out.println( jsonResult.getString("response") );
 			System.out.println(failLog);
-			throw new Exception();
+			//throw new Exception();
+			return false;
 		} else {
 			System.out.println(successLog);
-			System.out.println( jsonResult.getString("response") );
+			//System.out.println( jsonResult.getString("response") );
 			return true;
 		}
 	}
@@ -57,7 +58,7 @@ public class ResponseParser {
 
 	static String getProjectIdFromToken(String result) throws Exception {
 		JSONObject jsonResult = new JSONObject(result);
-		if (400 <= jsonResult.getInt("statusCode") && jsonResult.getInt("statusCode") <= 500) {
+		if (400 <= jsonResult.getInt("statusCode") && jsonResult.getInt("statusCode") < 600) {
 			// fail logic should be here
 			System.out.println( jsonResult.getInt("statusCode") );
 			throw new Exception();
@@ -108,7 +109,7 @@ public class ResponseParser {
 		return IP_id;
 	}
 
-	static String staticNATSettingResponseParser(String response) throws JSONException {
+	static String staticNATSettingResponseParser(String response) throws Exception {
 		JSONObject fianlJsonObject = new JSONObject(response);
 		JSONObject nc_enablestaticnatresponse = fianlJsonObject.getJSONObject("nc_enablestaticnatresponse");
 		String staticNAT_ID = "";
@@ -116,7 +117,7 @@ public class ResponseParser {
 			staticNAT_ID = nc_enablestaticnatresponse.getString("id");
 			return staticNAT_ID;
 		} else {
-			return staticNAT_ID;
+			throw new Exception();
 		}
 	}
 
@@ -158,6 +159,7 @@ public class ResponseParser {
 		String result = RestAPI.get(vmDetailUrl + vmId, token, timeout);
 		String 	response = ResponseParser.statusCodeParser(result);
 		String vmPrivateIp = ResponseParser.VmDetailResponseParser(response);
+		Etc.check(vmPrivateIp);
 		return vmPrivateIp;
 	}
 

@@ -7,7 +7,7 @@ public class App {
         try {
 
             String confPath = "C:\\Users\\young hwa park\\Desktop\\yhp\\source\\ktcloud\\ktcloud_sdk_1.0.4\\conf.json";
-
+//
 //            ServerInformation serverInformation = KTCloudOpenAPI.createServer("nana", "03a6328b-76c8-4d15-8e3f-d5cae5cf1156", "61c68bc1-3a56-4827-9fd1-6a7929362bf6",
 //                    10, "infra.op@solbox.com", "xJd*Qv*cBXpd7qX", "71655962-3e67-42d6-a17d-6ab61a435dfe",
 //                    "71655962-3e67-42d6-a17d-6ab61a435dfe", "172.25.1.1/24");

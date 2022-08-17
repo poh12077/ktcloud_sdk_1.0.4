@@ -71,7 +71,9 @@ public class KTCloudOpenAPI {
             // token
             result = RestAPI.post(getToken_URL, RequestBody.getToken(accountId, accountPassword), timeout);
             String token = ResponseParser.statusCodeParser(result);
+            Etc.check(token);
             String projectId = ResponseParser.getProjectIdFromToken(result);
+            Etc.check(projectId);
             serverInformation.setProjectID(projectId);
             String vmId = ResourceHandler.getVm(getVm_URL, token, serverName, serverImage, specs, timeout);
             serverInformation.setVmId(vmId);
@@ -137,7 +139,9 @@ public class KTCloudOpenAPI {
             // token
             result = RestAPI.post(getToken_URL, RequestBody.getToken(accountId,accountPassword), timeout);
             String token = ResponseParser.statusCodeParser(result);
+            Etc.check(token);
             String projectId = ResponseParser.getProjectIdFromToken(result);
+            Etc.check(projectId);
             serverInformation.setProjectID(projectId);
             String vmId = ResourceHandler.getVm(getVm_URL, token, serverName, serverImage, specs, timeout);
             serverInformation.setVmId(vmId);
@@ -172,37 +176,51 @@ public class KTCloudOpenAPI {
 
 
     public static String deleteServer(ServerInformation serverInformation, int timeout, String accountId, String accountPassword) throws Exception {
-        //read conf
-//        String confString = Etc.read(confPath);
-//        JSONObject conf = new JSONObject(confString);
-//        JSONObject http = conf.getJSONObject("http");
-//        int timeout = http.getInt("timeout");
-        System.out.println("Server deletion has started");
-        // token
-        String response = RestAPI.post(getToken_URL, RequestBody.getToken(accountId,accountPassword), 10);
-        String token = ResponseParser.statusCodeParser(response);
         boolean isVmDeleleted = false;
         boolean isVolumeDeleleted = false;
         boolean isFirewallCloseed = false;
         boolean isStaticNatDisabled = false;
         boolean isPublicIpDeleleted = false;
+        try {
+           //read conf
+//        String confString = Etc.read(confPath);
+//        JSONObject conf = new JSONObject(confString);
+//        JSONObject http = conf.getJSONObject("http");
+//        int timeout = http.getInt("timeout");
+           System.out.println("Server deletion has started");
+           // token
+           String response = RestAPI.post(getToken_URL, RequestBody.getToken(accountId, accountPassword), 10);
+           String token = ResponseParser.statusCodeParser(response);
+           Etc.check(token);
+           isVmDeleleted = ResourceHandler.deleteVmOnly(serverInformation.getVmId(), token, timeout);
+           isVolumeDeleleted = ResourceHandler.deleteVolume(serverInformation.getVolumeID(), serverInformation.getProjectID(), token, timeout, 500, 1);
+           isFirewallCloseed = ResourceHandler.closeFirewall(serverInformation.getFirewallJobId(), token, timeout);
+           isStaticNatDisabled = ResourceHandler.deleteStaticNat(serverInformation.getStaticNAT_ID(), token, timeout, 500,1);
+           isPublicIpDeleleted = ResourceHandler.deletePublicIp(serverInformation.getPublicIP_ID(), token, timeout,500,1);
 
-        isVmDeleleted = ResourceHandler.deleteVmOnly(serverInformation.getVmId(), token, timeout);
-        isVolumeDeleleted = ResourceHandler.deleteVolume(serverInformation.getVolumeID(), serverInformation.getProjectID(), token, timeout, 500, 1);
-        isFirewallCloseed = ResourceHandler.closeFirewall(serverInformation.getFirewallJobId(), token, timeout);
-        isStaticNatDisabled = ResourceHandler.deleteStaticNat(serverInformation.getStaticNAT_ID(), token, timeout);
-        isPublicIpDeleleted = ResourceHandler.deletePublicIp(serverInformation.getPublicIP_ID(), token, timeout);
+           System.out.println("server deletion is done");
 
-        System.out.println("server deletion is done");
+           JSONObject result = new JSONObject();
+           result.put("isVmDeleleted", isVmDeleleted);
+           result.put("isPublicIpDeleleted", isPublicIpDeleleted);
+           result.put("isFirewallCloseed", isFirewallCloseed);
+           result.put("isStaticNatDisabled", isStaticNatDisabled);
+           result.put("isVolumeDeleleted", isVolumeDeleleted);
+           System.out.println(result);
+           return result.toString();
+       }catch (Exception e){
+           System.out.println(e);
+           LOGGER.trace("server deletion failed");
 
-        JSONObject result = new JSONObject();
-        result.put("isVmDeleleted", isVmDeleleted);
-        result.put("isPublicIpDeleleted", isPublicIpDeleleted);
-        result.put("isFirewallCloseed", isFirewallCloseed);
-        result.put("isStaticNatDisabled", isStaticNatDisabled);
-        result.put("isVolumeDeleleted", isVolumeDeleleted);
-        System.out.println(result);
-        return result.toString();
+           JSONObject result = new JSONObject();
+           result.put("isVmDeleleted", isVmDeleleted);
+           result.put("isPublicIpDeleleted", isPublicIpDeleleted);
+           result.put("isFirewallCloseed", isFirewallCloseed);
+           result.put("isStaticNatDisabled", isStaticNatDisabled);
+           result.put("isVolumeDeleleted", isVolumeDeleleted);
+           System.out.println(result);
+           return result.toString();
+       }
     }
 
     public static void init(String confPath, String accountId, String accountPassword) throws Exception {
