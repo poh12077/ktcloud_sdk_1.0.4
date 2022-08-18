@@ -14,6 +14,7 @@ public class KTCloudOpenAPI {
     static final String VmDetail_URL = "https://api.ucloudbiz.olleh.com/d1/server/servers/";
 
     static final String getVolume_URL = "https://api.ucloudbiz.olleh.com/d1/volume/";
+    static String volumeStatusCheck = "https://api.ucloudbiz.olleh.com/d1/volume/";
     static final String connectVmAndVolume_URL = "https://api.ucloudbiz.olleh.com/d1/server/servers/";
     static final String deleteAllVolume_URL = "https://api.ucloudbiz.olleh.com/d1/volume/";
     static final String deleteVolume_URL = "https://api.ucloudbiz.olleh.com/d1/volume/";
@@ -37,13 +38,15 @@ public class KTCloudOpenAPI {
     static final String POST = "POST";
 
     public static ServerInformation createServer(String serverName, String serverImage, String specs, int timeout, String accountId, String accountPassword,
-                                                 String networkId, String destinationNetworkId, String destinationNetworkAddress  ) throws Exception {
+                                                 String networkId, String destinationNetworkId, String destinationNetworkAddress) throws Exception {
+        ServerInformation serverInformation = new ServerInformation();
+
         try {
             String result;
             String protocol = "ALL";
-            String startPort="0";
-            String endPort="65535";
-            String sourceNetworkId="6b812762-c6bc-4a6d-affb-c469af1b4342";
+            String inputPort = "1935";
+            String outputPort = "80";
+            String sourceNetworkId = "6b812762-c6bc-4a6d-affb-c469af1b4342";
 
             //String VmImage_nginx = "fab16e16-5d53-4e00-892f-bec4b10079bb";
 
@@ -66,7 +69,6 @@ public class KTCloudOpenAPI {
 //            String destinationNetworkId = firewall.getString("destinationNetworkId");
             LOGGER.trace("Server creation has started");
 
-            ServerInformation serverInformation = new ServerInformation();
             serverInformation.setNetworkID(networkId);
             // token
             result = RestAPI.post(getToken_URL, RequestBody.getToken(accountId, accountPassword), timeout);
@@ -90,14 +92,16 @@ public class KTCloudOpenAPI {
             }
             String staticNatId = ResourceHandler.setStaticNat(setStaticNAT_URL, token, networkId, vmPrivateIp, publicIpId, timeout);
             serverInformation.setStaticNAT_ID(staticNatId);
-            String firewallJobId = ResourceHandler.openFirewall(openFirewall_URL, token, startPort, endPort, staticNatId, sourceNetworkId,
+            String firewallJobIdOfInputPort = ResourceHandler.openFirewall(openFirewall_URL, token, inputPort, inputPort, staticNatId, sourceNetworkId,
                     destinationNetworkAddress, protocol, destinationNetworkId, timeout);
-            serverInformation.setFirewallJobId(firewallJobId);
+            serverInformation.setFirewallJobIdOfInputPort(firewallJobIdOfInputPort);
+            String firewallJobIdOfOutputPort = ResourceHandler.openFirewall(openFirewall_URL, token, outputPort, outputPort, staticNatId, sourceNetworkId,
+                    destinationNetworkAddress, protocol, destinationNetworkId, timeout);
+            serverInformation.setFirewallJobIdOfOutputPort(firewallJobIdOfOutputPort);
 
             System.out.println("server creation is done");
             return serverInformation;
         } catch (Exception e) {
-            ServerInformation serverInformation = new ServerInformation();
             KTCloudOpenAPI.deleteServer(serverInformation, timeout, accountId, accountPassword);
             throw new Exception();
         }
@@ -105,12 +109,13 @@ public class KTCloudOpenAPI {
 
     public static ServerInformation createServer(String serverName, String volumeName, String serverImage, String volumeImage, String specs, int timeout, String accountId, String accountPassword,
                                                  String networkId, String destinationNetworkId, String destinationNetworkAddress) throws Exception {
+        ServerInformation serverInformation = new ServerInformation();
         try {
             String result;
             String protocol = "ALL";
-            String startPort="0";
-            String endPort="65535";
-            String sourceNetworkId="6b812762-c6bc-4a6d-affb-c469af1b4342";
+            String inputPort = "1935";
+            String outputPort = "80";
+            String sourceNetworkId = "6b812762-c6bc-4a6d-affb-c469af1b4342";
 
             //String VmImage_nginx = "fab16e16-5d53-4e00-892f-bec4b10079bb";
 //            //read conf
@@ -134,10 +139,9 @@ public class KTCloudOpenAPI {
 
             System.out.println("Server creation has started");
 
-            ServerInformation serverInformation = new ServerInformation();
             serverInformation.setNetworkID(networkId);
             // token
-            result = RestAPI.post(getToken_URL, RequestBody.getToken(accountId,accountPassword), timeout);
+            result = RestAPI.post(getToken_URL, RequestBody.getToken(accountId, accountPassword), timeout);
             String token = ResponseParser.statusCodeParser(result);
             Etc.check(token);
             String projectId = ResponseParser.getProjectIdFromToken(result);
@@ -149,11 +153,13 @@ public class KTCloudOpenAPI {
             serverInformation.setVolumeID(volumeId);
             String publicIpId = ResourceHandler.getPublicIp(getIP_URL, token, timeout);
             serverInformation.setPublicIP_ID(publicIpId);
+            boolean isVolumeCreated = ResourceHandler.checkVolumeCreationStatus(volumeStatusCheck , token, volumeId, projectId, timeout, 500, 1);
             boolean isVmCreated = ResourceHandler.checkVmCreationStatus(VmDetail_URL, token, vmId, timeout, 500, 1);
-            if (isVmCreated) {
+
+            if (isVmCreated && isVolumeCreated ) {
                 ResourceHandler.connectVmAndVolume(connectVmAndVolume_URL, token, vmId, volumeId, timeout);
             } else {
-                System.out.println("vm creation error");
+                System.out.println("vm or volume creation error");
                 deleteServer(serverInformation, timeout, accountId, accountPassword);
                 throw new Exception();
             }
@@ -161,15 +167,17 @@ public class KTCloudOpenAPI {
             String vmPrivateIp = ResponseParser.lookupVmPrivateIp(VmDetail_URL, token, vmId, timeout);
             String staticNatId = ResourceHandler.setStaticNat(setStaticNAT_URL, token, networkId, vmPrivateIp, publicIpId, timeout);
             serverInformation.setStaticNAT_ID(staticNatId);
-            String firewallJobId = ResourceHandler.openFirewall(openFirewall_URL, token, startPort, endPort, staticNatId, sourceNetworkId,
+            String firewallJobIdOfInputPort = ResourceHandler.openFirewall(openFirewall_URL, token, inputPort, inputPort, staticNatId, sourceNetworkId,
                     destinationNetworkAddress, protocol, destinationNetworkId, timeout);
-            serverInformation.setFirewallJobId(firewallJobId);
+            serverInformation.setFirewallJobIdOfInputPort(firewallJobIdOfInputPort);
+            String firewallJobIdOfOutputPort = ResourceHandler.openFirewall(openFirewall_URL, token, outputPort, outputPort, staticNatId, sourceNetworkId,
+                    destinationNetworkAddress, protocol, destinationNetworkId, timeout);
+            serverInformation.setFirewallJobIdOfOutputPort(firewallJobIdOfOutputPort);
 
             System.out.println("server creation is done");
             return serverInformation;
         } catch (Exception e) {
-            ServerInformation serverInformation = new ServerInformation();
-            KTCloudOpenAPI.deleteServer(serverInformation, timeout,accountId,accountPassword);
+            KTCloudOpenAPI.deleteServer(serverInformation, timeout, accountId, accountPassword);
             throw new Exception();
         }
     }
@@ -178,49 +186,53 @@ public class KTCloudOpenAPI {
     public static String deleteServer(ServerInformation serverInformation, int timeout, String accountId, String accountPassword) throws Exception {
         boolean isVmDeleleted = false;
         boolean isVolumeDeleleted = false;
-        boolean isFirewallCloseed = false;
+        boolean isFirewallOfInputPortCloseed = false;
+        boolean isFirewallOfOutputPortCloseed = false;
         boolean isStaticNatDisabled = false;
         boolean isPublicIpDeleleted = false;
         try {
-           //read conf
+            //read conf
 //        String confString = Etc.read(confPath);
 //        JSONObject conf = new JSONObject(confString);
 //        JSONObject http = conf.getJSONObject("http");
 //        int timeout = http.getInt("timeout");
-           System.out.println("Server deletion has started");
-           // token
-           String response = RestAPI.post(getToken_URL, RequestBody.getToken(accountId, accountPassword), 10);
-           String token = ResponseParser.statusCodeParser(response);
-           Etc.check(token);
-           isVmDeleleted = ResourceHandler.deleteVmOnly(serverInformation.getVmId(), token, timeout);
-           isVolumeDeleleted = ResourceHandler.deleteVolume(serverInformation.getVolumeID(), serverInformation.getProjectID(), token, timeout, 500, 1);
-           isFirewallCloseed = ResourceHandler.closeFirewall(serverInformation.getFirewallJobId(), token, timeout);
-           isStaticNatDisabled = ResourceHandler.deleteStaticNat(serverInformation.getStaticNAT_ID(), token, timeout, 500,1);
-           isPublicIpDeleleted = ResourceHandler.deletePublicIp(serverInformation.getPublicIP_ID(), token, timeout,500,1);
+            System.out.println("Server deletion has started");
+            // token
+            String response = RestAPI.post(getToken_URL, RequestBody.getToken(accountId, accountPassword), 10);
+            String token = ResponseParser.statusCodeParser(response);
+            Etc.check(token);
+            isVmDeleleted = ResourceHandler.deleteVmOnly(serverInformation.getVmId(), token, timeout);
+            isVolumeDeleleted = ResourceHandler.deleteVolume(serverInformation.getVolumeID(), serverInformation.getProjectID(), token, timeout, 500, 1);
+            isFirewallOfInputPortCloseed = ResourceHandler.closeFirewall(serverInformation.getFirewallJobIdOfInputPort(), token, timeout);
+            isFirewallOfOutputPortCloseed = ResourceHandler.closeFirewall(serverInformation.getFirewallJobIdOfOutputPort(), token, timeout);
+            isStaticNatDisabled = ResourceHandler.deleteStaticNat(serverInformation.getStaticNAT_ID(), token, timeout, 500, 1);
+            isPublicIpDeleleted = ResourceHandler.deletePublicIp(serverInformation.getPublicIP_ID(), token, timeout, 500, 1);
 
-           System.out.println("server deletion is done");
+            System.out.println("server deletion is done");
 
-           JSONObject result = new JSONObject();
-           result.put("isVmDeleleted", isVmDeleleted);
-           result.put("isPublicIpDeleleted", isPublicIpDeleleted);
-           result.put("isFirewallCloseed", isFirewallCloseed);
-           result.put("isStaticNatDisabled", isStaticNatDisabled);
-           result.put("isVolumeDeleleted", isVolumeDeleleted);
-           System.out.println(result);
-           return result.toString();
-       }catch (Exception e){
-           System.out.println(e);
-           LOGGER.trace("server deletion failed");
+            JSONObject result = new JSONObject();
+            result.put("isVmDeleleted", isVmDeleleted);
+            result.put("isPublicIpDeleleted", isPublicIpDeleleted);
+            result.put("isFirewallOfInputPortCloseed", isFirewallOfInputPortCloseed);
+            result.put("isFirewallOfOutputPortCloseed", isFirewallOfOutputPortCloseed);
+            result.put("isStaticNatDisabled", isStaticNatDisabled);
+            result.put("isVolumeDeleleted", isVolumeDeleleted);
+            System.out.println(result);
+            return result.toString();
+        } catch (Exception e) {
+            System.out.println(e);
+            LOGGER.trace("server deletion failed");
 
-           JSONObject result = new JSONObject();
-           result.put("isVmDeleleted", isVmDeleleted);
-           result.put("isPublicIpDeleleted", isPublicIpDeleleted);
-           result.put("isFirewallCloseed", isFirewallCloseed);
-           result.put("isStaticNatDisabled", isStaticNatDisabled);
-           result.put("isVolumeDeleleted", isVolumeDeleleted);
-           System.out.println(result);
-           return result.toString();
-       }
+            JSONObject result = new JSONObject();
+            result.put("isVmDeleleted", isVmDeleleted);
+            result.put("isPublicIpDeleleted", isPublicIpDeleleted);
+            result.put("isFirewallOfInputPortCloseed", isFirewallOfInputPortCloseed);
+            result.put("isFirewallOfOutputPortCloseed", isFirewallOfOutputPortCloseed);
+            result.put("isStaticNatDisabled", isStaticNatDisabled);
+            result.put("isVolumeDeleleted", isVolumeDeleleted);
+            System.out.println(result);
+            return result.toString();
+        }
     }
 
     public static void init(String confPath, String accountId, String accountPassword) throws Exception {
@@ -232,7 +244,7 @@ public class KTCloudOpenAPI {
 
         String result;
         String response;
-        result = RestAPI.request(getToken_URL, POST, RequestBody.getToken(accountId,accountPassword) );
+        result = RestAPI.request(getToken_URL, POST, RequestBody.getToken(accountId, accountPassword));
         String token = ResponseParser.statusCodeParser(result);
         String projectID = ResponseParser.getProjectIdFromToken(result);
 

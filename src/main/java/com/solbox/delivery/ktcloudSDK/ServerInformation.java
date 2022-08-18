@@ -1,14 +1,15 @@
 package com.solbox.delivery.ktcloudSDK;
 public class ServerInformation {
-	static private String VmId="";
-	static private String volumeID="";
-	static private String publicIP_ID="";
-	static private String networkID="";
-	static private String staticNAT_ID="";
-	static private String firewallJobId="";
-	static private String projectID="";
+	 private String VmId="";
+	 private String volumeID="";
+	 private String publicIP_ID="";
+	 private String networkID="";
+	 private String staticNAT_ID="";
+	 private String firewallJobIdOfInputPort="";
+	private String firewallJobIdOfOutputPort="";
+	 private String projectID="";
 
-	static private String log="";
+	 private String log="";
 //	public ServerInformation(String VmId, String volumeID, String publicIP_ID,
 //			String staticNAT_ID, String projectID, String firewallJobId) {
 //		this.VmId = VmId;
@@ -71,12 +72,20 @@ public class ServerInformation {
 		this.staticNAT_ID = staticNAT_ID;
 	}
 
-	public String getFirewallJobId() {
-		return firewallJobId;
+	public String getFirewallJobIdOfInputPort() {
+		return firewallJobIdOfInputPort;
 	}
 
-	public void setFirewallJobId(String firewallJobId) {
-		this.firewallJobId = firewallJobId;
+	public void setFirewallJobIdOfInputPort(String firewallJobId) {
+		this.firewallJobIdOfInputPort = firewallJobId;
+	}
+
+	public String getFirewallJobIdOfOutputPort() {
+		return firewallJobIdOfOutputPort;
+	}
+
+	public void setFirewallJobIdOfOutputPort(String firewallJobId) {
+		this.firewallJobIdOfOutputPort = firewallJobId;
 	}
 
 	public String getProjectID() {
