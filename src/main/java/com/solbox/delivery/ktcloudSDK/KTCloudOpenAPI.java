@@ -235,7 +235,7 @@ public class KTCloudOpenAPI {
         }
     }
 
-    public static void init(String confPath, String accountId, String accountPassword) throws Exception {
+    static void init(String confPath, String accountId, String accountPassword) throws Exception {
         //read conf
         String confString = Etc.read(confPath);
         JSONObject conf = new JSONObject(confString);
@@ -276,7 +276,7 @@ public class KTCloudOpenAPI {
         System.out.println("initialization is done");
     }
 
-    public static void lookup() throws Exception {
+    static void lookup() throws Exception {
     }
 
 }

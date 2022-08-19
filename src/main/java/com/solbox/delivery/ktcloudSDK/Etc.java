@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class Etc {
+ class Etc {
 
     static String read(String path) throws IOException {
         byte[] data = Files.readAllBytes(Paths.get(path));

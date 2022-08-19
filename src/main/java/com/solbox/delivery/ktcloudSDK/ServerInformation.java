@@ -1,15 +1,16 @@
 package com.solbox.delivery.ktcloudSDK;
-public class ServerInformation {
-	 private String VmId="";
-	 private String volumeID="";
-	 private String publicIP_ID="";
-	 private String networkID="";
-	 private String staticNAT_ID="";
-	 private String firewallJobIdOfInputPort="";
-	private String firewallJobIdOfOutputPort="";
-	 private String projectID="";
 
-	 private String log="";
+public class ServerInformation {
+    private String VmId = "";
+    private String volumeID = "";
+    private String publicIP_ID = "";
+    private String networkID = "";
+    private String staticNAT_ID = "";
+    private String firewallJobIdOfInputPort = "";
+    private String firewallJobIdOfOutputPort = "";
+    private String projectID = "";
+
+    private String log = "";
 //	public ServerInformation(String VmId, String volumeID, String publicIP_ID,
 //			String staticNAT_ID, String projectID, String firewallJobId) {
 //		this.VmId = VmId;
@@ -21,79 +22,80 @@ public class ServerInformation {
 //		//this.networkID=networkID;
 //	}
 
-	public void setLog(String log){
-		this.log = this.log + System.lineSeparator() + log;
-	}
+     void setLog(String log) {
+        this.log = this.log + System.lineSeparator() + log;
+    }
 
-	public void initLog(){
-		this.log = "";
-	}
+    public void initLog() {
+        this.log = "";
+    }
 
-	public String getLog(){
-		return this.log;
-	}
-	public String getVmId() {
-		return VmId;
-	}
+    public String getLog() {
+        return this.log;
+    }
 
-	public void setVmId(String VmId) {
-		this.VmId = VmId;
-	}
+    public String getVmId() {
+        return VmId;
+    }
 
-	public String getVolumeID() {
-		return volumeID;
-	}
+     void setVmId(String VmId) {
+        this.VmId = VmId;
+    }
 
-	public void setVolumeID(String volumeID) {
-		this.volumeID = volumeID;
-	}
+    public String getVolumeID() {
+        return volumeID;
+    }
 
-	public String getPublicIP_ID() {
-		return publicIP_ID;
-	}
+     void setVolumeID(String volumeID) {
+        this.volumeID = volumeID;
+    }
 
-	public void setPublicIP_ID(String publicIP_ID) {
-		this.publicIP_ID = publicIP_ID;
-	}
+    public String getPublicIP_ID() {
+        return publicIP_ID;
+    }
 
-	public String getNetworkID() {
-		return networkID;
-	}
+     void setPublicIP_ID(String publicIP_ID) {
+        this.publicIP_ID = publicIP_ID;
+    }
 
-	public void setNetworkID(String networkID) {
-		this.networkID = networkID;
-	}
+    public String getNetworkID() {
+        return networkID;
+    }
 
-	public String getStaticNAT_ID() {
-		return staticNAT_ID;
-	}
+     void setNetworkID(String networkID) {
+        this.networkID = networkID;
+    }
 
-	public void setStaticNAT_ID(String staticNAT_ID) {
-		this.staticNAT_ID = staticNAT_ID;
-	}
+    public String getStaticNAT_ID() {
+        return staticNAT_ID;
+    }
 
-	public String getFirewallJobIdOfInputPort() {
-		return firewallJobIdOfInputPort;
-	}
+     void setStaticNAT_ID(String staticNAT_ID) {
+        this.staticNAT_ID = staticNAT_ID;
+    }
 
-	public void setFirewallJobIdOfInputPort(String firewallJobId) {
-		this.firewallJobIdOfInputPort = firewallJobId;
-	}
+    public String getFirewallJobIdOfInputPort() {
+        return firewallJobIdOfInputPort;
+    }
 
-	public String getFirewallJobIdOfOutputPort() {
-		return firewallJobIdOfOutputPort;
-	}
+     void setFirewallJobIdOfInputPort(String firewallJobId) {
+        this.firewallJobIdOfInputPort = firewallJobId;
+    }
 
-	public void setFirewallJobIdOfOutputPort(String firewallJobId) {
-		this.firewallJobIdOfOutputPort = firewallJobId;
-	}
+    public String getFirewallJobIdOfOutputPort() {
+        return firewallJobIdOfOutputPort;
+    }
 
-	public String getProjectID() {
-		return projectID;
-	}
+     void setFirewallJobIdOfOutputPort(String firewallJobId) {
+        this.firewallJobIdOfOutputPort = firewallJobId;
+    }
 
-	public void setProjectID(String projectID) {
-		this.projectID = projectID;
-	}
+    public String getProjectID() {
+        return projectID;
+    }
+
+     void setProjectID(String projectID) {
+        this.projectID = projectID;
+    }
 
 }

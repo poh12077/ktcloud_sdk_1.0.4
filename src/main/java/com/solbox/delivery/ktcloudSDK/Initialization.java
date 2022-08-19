@@ -3,7 +3,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Initialization {
+class Initialization {
 
 	static void deleteAllVolume(String list, String token, String projectId, int timeout) throws Exception {
 

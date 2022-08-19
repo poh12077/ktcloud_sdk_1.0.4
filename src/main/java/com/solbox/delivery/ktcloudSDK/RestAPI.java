@@ -30,7 +30,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.http.entity.StringEntity;
 
-public class RestAPI {
+class RestAPI {
     // token
     static String request(String URL, String method, String requestBody) throws Exception {
         URL url = new URL(URL);

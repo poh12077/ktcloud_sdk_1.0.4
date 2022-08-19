@@ -10,7 +10,7 @@ import org.json.JSONException;
 import org.omg.PortableInterceptor.LOCATION_FORWARD;
 
 
-public class ResourceHandler {
+class ResourceHandler {
 
     static void getToken() throws Exception {
 
@@ -116,7 +116,7 @@ public class ResourceHandler {
         System.out.println("volume creation is in progress ");
         int count = 0;
         while (true) {
-            String result = RestAPI.get(volumeStatusCheck+projectId+"/volumes/"+volumeId, token, timeout);
+            String result = RestAPI.get(volumeStatusCheck + projectId + "/volumes/" + volumeId, token, timeout);
             String response = ResponseParser.statusCodeParser(result);
             JSONObject fianlJsonObject = new JSONObject(response);
             JSONObject volume = fianlJsonObject.getJSONObject("volume");
@@ -136,7 +136,6 @@ public class ResourceHandler {
     }
 
 
-
     static boolean deleteVmOnly(String serverID, String token, int timeout) {
         try {
             if (serverID.length() == 0) {
@@ -146,14 +145,13 @@ public class ResourceHandler {
             String result = RestAPI.post(KTCloudOpenAPI.forceDeleteVm_URL + serverID + "/action", token, requestBody,
                     timeout);
             return ResponseParser.statusCodeParserInDeletion(result, "VM deletion is in progress", "VM deletion failed");
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e);
             return false;
         }
     }
 
-    static boolean deleteVolume(String volumeID, String projectID, String token, int timeout, int maximumWaitingTime, int requestCycle){
+    static boolean deleteVolume(String volumeID, String projectID, String token, int timeout, int maximumWaitingTime, int requestCycle) {
         try {
             if (volumeID.length() == 0) {
                 return false;
@@ -175,11 +173,40 @@ public class ResourceHandler {
                     return false;
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e);
             return false;
         }
     }
+
+//    static boolean deleteStaticNat(String staticNatId, String token, int timeout, int maximumWaitingTime, int requestCycle) {
+//        try {
+//            if (staticNatId.length() == 0) {
+//                return false;
+//            }
+//
+//            int count = 0;
+//            while (true) {
+//                String result = RestAPI.delete(KTCloudOpenAPI.DeleteStaticNAT_URL + staticNatId, token, timeout);
+//
+//                if (ResponseParser.statusCodeParserInDeletion(result, "static NAT has been disabled", "static NAT deletion has failed")) {
+//                    return true;
+//                } else {
+//                    System.out.print(count + " ");
+//                }
+//                count++;
+//                Thread.sleep(requestCycle * 1000);
+//
+//                if (maximumWaitingTime <= count) {
+//                    System.out.print("static NAT deletion has failed");
+//                    return false;
+//                }
+//            }
+//        }catch (Exception e){
+//            System.out.println(e);
+//            return false;
+//        }
+//    }
 
     static boolean deleteStaticNat(String staticNatId, String token, int timeout, int maximumWaitingTime, int requestCycle) {
         try {
@@ -190,12 +217,33 @@ public class ResourceHandler {
             int count = 0;
             while (true) {
                 String result = RestAPI.delete(KTCloudOpenAPI.DeleteStaticNAT_URL + staticNatId, token, timeout);
+                JSONObject fianlJsonObject = new JSONObject(result);
+                String responseString = fianlJsonObject.getString("response");
+                JSONObject response = new JSONObject(responseString);
+                JSONObject nc_disablestaticnatresponse = response.getJSONObject("nc_disablestaticnatresponse");
+                if (nc_disablestaticnatresponse.has("job_id")) {
+                    String jobId = nc_disablestaticnatresponse.getString("job_id");
+                    // result = RestAPI.request(KTCloudOpenAPI.staticNATList_URL, "GET", token, "");
+                    result = ResponseParser.lookupJobId(jobId, token, 10);
+                    //  result = RestAPI.get(KTCloudOpenAPI.staticNATList_URL, token, timeout);
+                    fianlJsonObject = new JSONObject(result);
+                    responseString = fianlJsonObject.getString("response");
+                    response = new JSONObject(responseString);
+                    JSONObject nc_queryasyncjobresultresponse = response.getJSONObject("nc_queryasyncjobresultresponse");
+                    int state = nc_queryasyncjobresultresponse.getInt("state");
+                    if (state == 1) {
+                        KTCloudOpenAPI.LOGGER.trace("static NAT has been deleted");
+                        return true;
+                    } else if (state == 0) {
+                        KTCloudOpenAPI.LOGGER.trace("static NAT deletion is in progress");
+                    } else {
+                        KTCloudOpenAPI.LOGGER.trace(count + "static NAT deletion failed");
+                    }
 
-                if (ResponseParser.statusCodeParserInDeletion(result, "static NAT has been disabled", "static NAT deletion has failed")) {
-                    return true;
                 } else {
                     System.out.print(count + " ");
                 }
+
                 count++;
                 Thread.sleep(requestCycle * 1000);
 
@@ -204,11 +252,12 @@ public class ResourceHandler {
                     return false;
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e);
             return false;
         }
     }
+
 
     static boolean deletePublicIp(String publicIpId, String token, int timeout, int maximumWaitingTime,
                                   int requestCycle) {
@@ -237,7 +286,7 @@ public class ResourceHandler {
                     return false;
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e);
             return false;
         }
@@ -252,7 +301,7 @@ public class ResourceHandler {
             String firewallId = ResponseParser.firewallIdParser(response);
             String result = RestAPI.delete(KTCloudOpenAPI.closeFirewall_URL + firewallId, token, timeout);
             return ResponseParser.statusCodeParserInDeletion(result, "firewall has closed", "firewall still opened");
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e);
             return false;
         }

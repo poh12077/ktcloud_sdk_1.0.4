@@ -4,7 +4,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class RequestBody {
+class RequestBody {
 	static String getVm(String name, String imageID, String specs) throws JSONException {
 		JSONObject finalJsonObject = new JSONObject();
 		JSONObject server = new JSONObject();

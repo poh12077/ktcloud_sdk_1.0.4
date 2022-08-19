@@ -4,7 +4,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.net.HttpURLConnection;
 
-public class ResponseParser {
+class ResponseParser {
 
 //	static String statusCodeParser(String result) throws Exception {
 //		JSONObject jsonResult = new JSONObject(result);
