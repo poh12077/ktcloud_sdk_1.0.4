@@ -187,7 +187,7 @@ class ResourceHandler {
                 JSONObject nc_disablestaticnatresponse = response.getJSONObject("nc_disablestaticnatresponse");
                 if (nc_disablestaticnatresponse.has("job_id")) {
                     String jobId = nc_disablestaticnatresponse.getString("job_id");
-                    boolean isStaticNatDeleted = ResponseParser.lookupJobId(jobId, token, timeout, count, "static NAT");
+                    boolean isStaticNatDeleted = ResponseParser.lookupJobId(jobId, token, timeout, count, "static NAT", maximumWaitingTime, requestCycle);
                     if (isStaticNatDeleted) {
                         return true;
                     }
@@ -208,55 +208,6 @@ class ResourceHandler {
             return false;
         }
     }
-
-//
-//    static boolean deleteStaticNat(String staticNatId, String token, int timeout, int maximumWaitingTime, int requestCycle) {
-//        try {
-//            if (staticNatId.length() == 0) {
-//                KTCloudOpenAPI.LOGGER.trace("no static nat id");
-//                return false;
-//            }
-//
-//            int count = 0;
-//            while (true) {
-//                String result = RestAPI.delete(KTCloudOpenAPI.DeleteStaticNAT_URL + staticNatId, token, timeout);
-//                JSONObject fianlJsonObject = new JSONObject(result);
-//                String responseString = fianlJsonObject.getString("response");
-//                JSONObject response = new JSONObject(responseString);
-//                JSONObject nc_disablestaticnatresponse = response.getJSONObject("nc_disablestaticnatresponse");
-//                if (nc_disablestaticnatresponse.has("job_id")) {
-//                    String jobId = nc_disablestaticnatresponse.getString("job_id");
-//                    result = ResponseParser.lookupJobId(jobId, token, timeout);
-//                    fianlJsonObject = new JSONObject(result);
-//                    JSONObject nc_queryasyncjobresultresponse = fianlJsonObject.getJSONObject("nc_queryasyncjobresultresponse");
-//                    int state = nc_queryasyncjobresultresponse.getInt("state");
-//                    if (state == 1) {
-//                        KTCloudOpenAPI.LOGGER.trace("static NAT has been deleted");
-//                        return true;
-//                    } else if (state == 0) {
-//                        KTCloudOpenAPI.LOGGER.trace(count + "static NAT deletion is in progress");
-//                    } else {
-//                        KTCloudOpenAPI.LOGGER.trace(count + "static NAT deletion failed");
-//                    }
-//
-//                } else {
-//                    KTCloudOpenAPI.LOGGER.trace(count + "static NAT deletion failed, since no job id");
-//                }
-//
-//                count++;
-//                Thread.sleep(requestCycle * 1000);
-//
-//                if (maximumWaitingTime <= count) {
-//                    System.out.print("static NAT deletion has failed");
-//                    return false;
-//                }
-//            }
-//        } catch (Exception e) {
-//            System.out.println(e);
-//            return false;
-//        }
-//    }
-
 
     static boolean deletePublicIp(String publicIpId, String token, int timeout, int maximumWaitingTime,
                                   int requestCycle) {
@@ -307,7 +258,7 @@ class ResourceHandler {
                 JSONObject fianlJsonObject = new JSONObject(response);
                 JSONObject nc_deletefirewallruleresponse = fianlJsonObject.getJSONObject("nc_deletefirewallruleresponse");
                 String jobId = nc_deletefirewallruleresponse.getString("job_id");
-                boolean isFirewallClosed = ResponseParser.lookupJobId(jobId, token, timeout, count, "firewall");
+                boolean isFirewallClosed = ResponseParser.lookupJobId(jobId, token, timeout, count, "firewall", maximumWaitingTime, requestCycle);
                 if (isFirewallClosed) {
                     return true;
                 }

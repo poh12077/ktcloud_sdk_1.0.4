@@ -157,25 +157,37 @@ class ResponseParser {
         return response;
     }
 
-    static boolean lookupJobId(String jobId, String token, int timeout, int count, String log) throws Exception {
-        String result = RestAPI.get(KTCloudOpenAPI.jobID_URL + jobId, token, timeout);
-        String response = ResponseParser.statusCodeParser(result);
-        JSONObject fianlJsonObject = new JSONObject(response);
-        JSONObject nc_queryasyncjobresultresponse = fianlJsonObject.getJSONObject("nc_queryasyncjobresultresponse");
-        int state = nc_queryasyncjobresultresponse.getInt("state");
-        if (state == 1) {
-            KTCloudOpenAPI.LOGGER.trace(log+" has been deleted");
-            return true;
-        } else if (state == 0) {
-            KTCloudOpenAPI.LOGGER.trace(count +log+" deletion is in progress");
-			return false;
-        } else if (state == 2){
-            KTCloudOpenAPI.LOGGER.trace(count +log+" deletion failed");
-			return false;
-        }else{
-			KTCloudOpenAPI.LOGGER.trace(log+" error");
-			return false;
-		}
+    static boolean lookupJobId(String jobId, String token, int timeout, int deletionCount, String log, int maximumWaitingTime, int requestCycle ) throws Exception {
+        int waitingCount=0;
+
+        while (true) {
+            String result = RestAPI.get(KTCloudOpenAPI.jobID_URL + jobId, token, timeout);
+            String response = ResponseParser.statusCodeParser(result);
+            JSONObject fianlJsonObject = new JSONObject(response);
+            JSONObject nc_queryasyncjobresultresponse = fianlJsonObject.getJSONObject("nc_queryasyncjobresultresponse");
+            int state = nc_queryasyncjobresultresponse.getInt("state");
+            if (state == 1) {
+                KTCloudOpenAPI.LOGGER.trace(log + " has been deleted");
+                return true;
+            } else if (state == 0) {
+                KTCloudOpenAPI.LOGGER.trace(waitingCount + " " + log + " deletion is in progress");
+                waitingCount++;
+                Thread.sleep(requestCycle * 1000);
+
+            } else if (state == 2) {
+                KTCloudOpenAPI.LOGGER.trace(deletionCount + " " + log + " deletion failed");
+                return false;
+            } else {
+                KTCloudOpenAPI.LOGGER.trace(log + " error");
+                return false;
+            }
+
+            if (maximumWaitingTime <= waitingCount) {
+                System.out.print(log+" deletion has failed");
+                return false;
+            }
+
+        }
     }
 
 
