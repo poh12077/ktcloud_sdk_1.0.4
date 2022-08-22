@@ -42,35 +42,35 @@ public class ServerInformation {
         this.VmId = VmId;
     }
 
-    public String getVolumeID() {
+    public String getVolumeId() {
         return volumeID;
     }
 
-     void setVolumeID(String volumeID) {
+     void setVolumeId(String volumeID) {
         this.volumeID = volumeID;
     }
 
-    public String getPublicIP_ID() {
+    public String getPublicIpId() {
         return publicIP_ID;
     }
 
-     void setPublicIP_ID(String publicIP_ID) {
+     void setPublicIpId(String publicIP_ID) {
         this.publicIP_ID = publicIP_ID;
     }
 
-    public String getNetworkID() {
+    public String getNetworkId() {
         return networkID;
     }
 
-     void setNetworkID(String networkID) {
+     void setNetworkId(String networkID) {
         this.networkID = networkID;
     }
 
-    public String getStaticNAT_ID() {
+    public String getStaticNatId() {
         return staticNAT_ID;
     }
 
-     void setStaticNAT_ID(String staticNAT_ID) {
+     void setStaticNatId(String staticNAT_ID) {
         this.staticNAT_ID = staticNAT_ID;
     }
 
@@ -90,11 +90,11 @@ public class ServerInformation {
         this.firewallJobIdOfOutputPort = firewallJobId;
     }
 
-    public String getProjectID() {
+    public String getProjectId() {
         return projectID;
     }
 
-     void setProjectID(String projectID) {
+     void setProjectId(String projectID) {
         this.projectID = projectID;
     }
 

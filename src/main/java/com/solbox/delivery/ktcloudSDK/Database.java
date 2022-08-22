@@ -82,10 +82,10 @@ public class Database {
 
 		try {
 			String vmId = serverInformation.getVmId();
-			String volumeId = serverInformation.getVolumeID();
-			String publicIP_ID = serverInformation.getPublicIP_ID();
-			String staticNAT_ID = serverInformation.getStaticNAT_ID();
-			String projectID = serverInformation.getProjectID();
+			String volumeId = serverInformation.getVolumeId();
+			String publicIP_ID = serverInformation.getPublicIpId();
+			String staticNAT_ID = serverInformation.getStaticNatId();
+			String projectID = serverInformation.getProjectId();
 
 			String info = "(\"" + vmId + "\",\"" + volumeId + "\",\"" + publicIP_ID + "\",\"" + staticNAT_ID + "\",\""
 					+ projectID + "\");";
