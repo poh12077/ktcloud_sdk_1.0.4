@@ -40,8 +40,7 @@ class ResourceHandler {
         String result = RestAPI.post(connectVmAndVolumeUrl + vmId + "/os-volume_attachments", token, requestBody, timeout);
         ResponseParser.statusCodeParser(result);
     }
-
-    static String getPublicIp(String getPublicIpUrl, String token, int timeout) throws Exception {
+    static String getPublicIp(String getPublicIpUrl, String token, int timeout, int maximumWatingTimeGenerally, int requestCycle) throws Exception {
         String publicIpJobId = "";
         String result = RestAPI.post(getPublicIpUrl, token, "", timeout);
         JSONObject fianlJsonObject = new JSONObject(result);
@@ -50,15 +49,14 @@ class ResourceHandler {
         JSONObject nc_associateentpublicipresponse = response.getJSONObject("nc_associateentpublicipresponse");
         if (nc_associateentpublicipresponse.has("job_id")) {
             publicIpJobId = ResponseParser.IPCreateResponseParser(responseString);
-            responseString = ResponseParser.lookupJobId(publicIpJobId, token, timeout);
-            String publicIpId = ResponseParser.PublicIPJobIDlookupParser(responseString);
+            String publicIpId = ResponseParser.lookupPublicIpJobId(publicIpJobId,token,timeout,"public IP creation",maximumWatingTimeGenerally,requestCycle);
             Etc.check(publicIpId);
             return publicIpId;
         } else {
-            System.out.println("public ip creation error");
             throw new Exception();
         }
     }
+
 
     static String setStaticNat(String setStaticNatUrl, String token, String networkId, String vmPrivateIp, String publicIpId, int timeout) throws Exception {
         String requestBody = RequestBody.setStaticNat(vmPrivateIp, networkId, publicIpId);
@@ -238,8 +236,11 @@ class ResourceHandler {
                 JSONObject response = new JSONObject(responseString);
                 JSONObject nc_disassociateentpublicipresponse = response.getJSONObject("nc_disassociateentpublicipresponse");
                 if (nc_disassociateentpublicipresponse.has("job_id")) {
-                    KTCloudOpenAPI.LOGGER.trace("Public IP has been deleted");
-                    return true;
+                    String jobId = nc_disassociateentpublicipresponse.getString("job_id");
+                    boolean isPublicIpDeleted = ResponseParser.lookupJobId(jobId, token, timeout, count, "Public IP deletion ", maximumWaitingTime, requestCycle);
+                    if (isPublicIpDeleted) {
+                        return true;
+                    }
                 } else {
                     System.out.print(count + " ");
                 }

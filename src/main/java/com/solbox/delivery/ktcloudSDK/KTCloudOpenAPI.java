@@ -63,7 +63,7 @@ public class KTCloudOpenAPI {
             serverInformation.setProjectId(projectId);
             String vmId = ResourceHandler.getVm(getVm_URL, token, serverName, serverImage, specs, timeout);
             serverInformation.setVmId(vmId);
-            String publicIpId = ResourceHandler.getPublicIp(getIP_URL, token, timeout);
+            String publicIpId = ResourceHandler.getPublicIp(getIP_URL, token, timeout, maximumWatingTimeGenerally, requestCycle);
             serverInformation.setPublicIpId(publicIpId);
             boolean isVmCreated = ResourceHandler.checkVmCreationStatus(VmDetail_URL, token, vmId, timeout, maximumWatingTimeForVm, requestCycle);
             String vmPrivateIp = "";
@@ -118,7 +118,7 @@ public class KTCloudOpenAPI {
             serverInformation.setVmId(vmId);
             String volumeId = ResourceHandler.getVolume(getVolume_URL, token, volumeName, volumeImage, projectId, timeout);
             serverInformation.setVolumeId(volumeId);
-            String publicIpId = ResourceHandler.getPublicIp(getIP_URL, token, timeout);
+            String publicIpId = ResourceHandler.getPublicIp(getIP_URL, token, timeout, maximumWatingTimeGenerally, requestCycle);
             serverInformation.setPublicIpId(publicIpId);
             boolean isVolumeCreated = ResourceHandler.checkVolumeCreationStatus(volumeStatusCheck , token, volumeId, projectId, timeout, maximumWatingTimeGenerally, requestCycle);
             boolean isVmCreated = ResourceHandler.checkVmCreationStatus(VmDetail_URL, token, vmId, timeout, maximumWatingTimeForVm, requestCycle);

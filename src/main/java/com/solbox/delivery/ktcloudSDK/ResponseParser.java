@@ -103,14 +103,6 @@ class ResponseParser {
         return job_id;
     }
 
-    static String PublicIPJobIDlookupParser(String response) throws JSONException {
-        JSONObject fianlJsonObject = new JSONObject(response);
-        JSONObject nc_associateentpublicipresponse = fianlJsonObject.getJSONObject("nc_queryasyncjobresultresponse");
-        JSONObject result = nc_associateentpublicipresponse.getJSONObject("result");
-        String IP_id = result.getString("id");
-        return IP_id;
-    }
-
     static String staticNATSettingResponseParser(String response) throws Exception {
         JSONObject fianlJsonObject = new JSONObject(response);
         JSONObject nc_enablestaticnatresponse = fianlJsonObject.getJSONObject("nc_enablestaticnatresponse");
@@ -170,6 +162,7 @@ class ResponseParser {
                 KTCloudOpenAPI.LOGGER.trace(log + " has been done");
                 return true;
             } else if (state == 0) {
+                //waiting for completion
                 KTCloudOpenAPI.LOGGER.trace(waitingCount + " " + log + " is in progress");
                 waitingCount++;
                 Thread.sleep(requestCycle * 1000);
@@ -189,6 +182,43 @@ class ResponseParser {
 
         }
     }
+
+    static String lookupPublicIpJobId(String jobId, String token, int timeout, String log, int maximumWaitingTime, int requestCycle ) throws Exception {
+        int waitingCount=0;
+
+        while (true) {
+            String result = RestAPI.get(KTCloudOpenAPI.jobID_URL + jobId, token, timeout);
+            String response = ResponseParser.statusCodeParser(result);
+            JSONObject fianlJsonObject = new JSONObject(response);
+            JSONObject nc_queryasyncjobresultresponse = fianlJsonObject.getJSONObject("nc_queryasyncjobresultresponse");
+            int state = nc_queryasyncjobresultresponse.getInt("state");
+            if (state == 1) {
+                KTCloudOpenAPI.LOGGER.trace(log + " has been done");
+                JSONObject resultJson = nc_queryasyncjobresultresponse.getJSONObject("result");
+                String publicIpId = resultJson.getString("id");
+                return publicIpId;
+            } else if (state == 0) {
+                KTCloudOpenAPI.LOGGER.trace(waitingCount + " " + log + " is in progress");
+                waitingCount++;
+                Thread.sleep(requestCycle * 1000);
+
+            } else if (state == 2) {
+                KTCloudOpenAPI.LOGGER.trace(log + " failed");
+                throw new Exception();
+            } else {
+                KTCloudOpenAPI.LOGGER.trace(log + " error");
+                throw new Exception();
+            }
+
+            if (maximumWaitingTime <= waitingCount) {
+                System.out.print(log+" failed");
+                throw new Exception();
+            }
+
+        }
+    }
+
+
 
 
     static String lookupVmPrivateIp(String vmDetailUrl, String token, String vmId, int timeout) throws Exception {
