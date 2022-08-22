@@ -167,15 +167,15 @@ class ResponseParser {
             JSONObject nc_queryasyncjobresultresponse = fianlJsonObject.getJSONObject("nc_queryasyncjobresultresponse");
             int state = nc_queryasyncjobresultresponse.getInt("state");
             if (state == 1) {
-                KTCloudOpenAPI.LOGGER.trace(log + " has been deleted");
+                KTCloudOpenAPI.LOGGER.trace(log + " has been done");
                 return true;
             } else if (state == 0) {
-                KTCloudOpenAPI.LOGGER.trace(waitingCount + " " + log + " deletion is in progress");
+                KTCloudOpenAPI.LOGGER.trace(waitingCount + " " + log + " is in progress");
                 waitingCount++;
                 Thread.sleep(requestCycle * 1000);
 
             } else if (state == 2) {
-                KTCloudOpenAPI.LOGGER.trace(deletionCount + " " + log + " deletion failed");
+                KTCloudOpenAPI.LOGGER.trace(deletionCount + " " + log + " failed");
                 return false;
             } else {
                 KTCloudOpenAPI.LOGGER.trace(log + " error");
@@ -183,7 +183,7 @@ class ResponseParser {
             }
 
             if (maximumWaitingTime <= waitingCount) {
-                System.out.print(log+" deletion has failed");
+                System.out.print(log+" failed");
                 return false;
             }
 

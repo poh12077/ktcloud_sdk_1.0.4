@@ -70,13 +70,27 @@ class ResourceHandler {
     }
 
     static String openFirewall(String openFirewallUrl, String token, String startPort, String endPort, String staticNatId, String sourceNetworkId,
-                               String destinationNetworkAddress, String protocol, String destinationNetworkId, int timeout) throws Exception {
-        String requestBody = RequestBody.openFirewall(startPort, endPort, staticNatId, sourceNetworkId, destinationNetworkAddress, protocol, destinationNetworkId);
-        String result = RestAPI.post(openFirewallUrl, token, requestBody, timeout);
-        String response = ResponseParser.statusCodeParser(result);
-        String firewallJobId = ResponseParser.firewallJobIdParser(response);
-        Etc.check(firewallJobId);
-        return firewallJobId;
+                               String destinationNetworkAddress, String protocol, String destinationNetworkId, int timeout, int maximumWatingTimeGenerally, int requestCycle ) throws Exception {
+        int count = 0;
+        while (true) {
+            String requestBody = RequestBody.openFirewall(startPort, endPort, staticNatId, sourceNetworkId, destinationNetworkAddress, protocol, destinationNetworkId);
+            String result = RestAPI.post(openFirewallUrl, token, requestBody, timeout);
+            String response = ResponseParser.statusCodeParser(result);
+            String firewallJobId = ResponseParser.firewallJobIdParser(response);
+            Etc.check(firewallJobId);
+            boolean isFirewallOpened = ResponseParser.lookupJobId(firewallJobId, token, timeout, count, "firewall activation", maximumWatingTimeGenerally, requestCycle);
+            if (isFirewallOpened) {
+                return firewallJobId;
+            }
+
+            count++;
+            Thread.sleep(requestCycle * 1000);
+
+            if (maximumWatingTimeGenerally <= count) {
+                System.out.print("firewall activation has failed");
+                throw new Exception();
+            }
+        }
     }
 
     static boolean checkVmCreationStatus(String vmDetailUrl, String token, String vmId, int timeout, int maximumWaitingTime, int requestCycle) throws Exception {
@@ -187,7 +201,7 @@ class ResourceHandler {
                 JSONObject nc_disablestaticnatresponse = response.getJSONObject("nc_disablestaticnatresponse");
                 if (nc_disablestaticnatresponse.has("job_id")) {
                     String jobId = nc_disablestaticnatresponse.getString("job_id");
-                    boolean isStaticNatDeleted = ResponseParser.lookupJobId(jobId, token, timeout, count, "static NAT", maximumWaitingTime, requestCycle);
+                    boolean isStaticNatDeleted = ResponseParser.lookupJobId(jobId, token, timeout, count, "disabling static NAT", maximumWaitingTime, requestCycle);
                     if (isStaticNatDeleted) {
                         return true;
                     }
@@ -258,7 +272,7 @@ class ResourceHandler {
                 JSONObject fianlJsonObject = new JSONObject(response);
                 JSONObject nc_deletefirewallruleresponse = fianlJsonObject.getJSONObject("nc_deletefirewallruleresponse");
                 String jobId = nc_deletefirewallruleresponse.getString("job_id");
-                boolean isFirewallClosed = ResponseParser.lookupJobId(jobId, token, timeout, count, "firewall", maximumWaitingTime, requestCycle);
+                boolean isFirewallClosed = ResponseParser.lookupJobId(jobId, token, timeout, count, "disabling firewall ", maximumWaitingTime, requestCycle);
                 if (isFirewallClosed) {
                     return true;
                 }
@@ -267,7 +281,7 @@ class ResourceHandler {
                 Thread.sleep(requestCycle * 1000);
 
                 if (maximumWaitingTime <= count) {
-                    System.out.print("static NAT deletion has failed");
+                    System.out.print("disabling firewall has failed");
                     return false;
                 }
             }

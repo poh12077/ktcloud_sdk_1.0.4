@@ -77,10 +77,10 @@ public class KTCloudOpenAPI {
             String staticNatId = ResourceHandler.setStaticNat(setStaticNAT_URL, token, networkId, vmPrivateIp, publicIpId, timeout);
             serverInformation.setStaticNatId(staticNatId);
             String firewallJobIdOfInputPort = ResourceHandler.openFirewall(openFirewall_URL, token, inputPort, inputPort, staticNatId, sourceNetworkId,
-                    destinationNetworkAddress, protocol, destinationNetworkId, timeout);
+                    destinationNetworkAddress, protocol, destinationNetworkId, timeout, maximumWatingTimeGenerally, requestCycle);
             serverInformation.setFirewallJobIdOfInputPort(firewallJobIdOfInputPort);
             String firewallJobIdOfOutputPort = ResourceHandler.openFirewall(openFirewall_URL, token, outputPort, outputPort, staticNatId, sourceNetworkId,
-                    destinationNetworkAddress, protocol, destinationNetworkId, timeout);
+                    destinationNetworkAddress, protocol, destinationNetworkId, timeout, maximumWatingTimeGenerally, requestCycle);
             serverInformation.setFirewallJobIdOfOutputPort(firewallJobIdOfOutputPort);
 
             System.out.println("server creation is done");
@@ -135,10 +135,10 @@ public class KTCloudOpenAPI {
             String staticNatId = ResourceHandler.setStaticNat(setStaticNAT_URL, token, networkId, vmPrivateIp, publicIpId, timeout);
             serverInformation.setStaticNatId(staticNatId);
             String firewallJobIdOfInputPort = ResourceHandler.openFirewall(openFirewall_URL, token, inputPort, inputPort, staticNatId, sourceNetworkId,
-                    destinationNetworkAddress, protocol, destinationNetworkId, timeout);
+                    destinationNetworkAddress, protocol, destinationNetworkId, timeout, maximumWatingTimeGenerally, requestCycle);
             serverInformation.setFirewallJobIdOfInputPort(firewallJobIdOfInputPort);
             String firewallJobIdOfOutputPort = ResourceHandler.openFirewall(openFirewall_URL, token, outputPort, outputPort, staticNatId, sourceNetworkId,
-                    destinationNetworkAddress, protocol, destinationNetworkId, timeout);
+                    destinationNetworkAddress, protocol, destinationNetworkId, timeout, maximumWatingTimeGenerally, requestCycle);
             serverInformation.setFirewallJobIdOfOutputPort(firewallJobIdOfOutputPort);
 
             System.out.println("server creation is done");
