@@ -33,13 +33,12 @@ class ResponseParser {
     static boolean statusCodeParserInDeletion(String result, String successLog, String failLog) throws Exception {
         JSONObject jsonResult = new JSONObject(result);
         if (400 <= jsonResult.getInt("statusCode") && jsonResult.getInt("statusCode") < 600) {
-            //System.out.println( jsonResult.getString("response") );
-            System.out.println(failLog);
-            //throw new Exception();
+            if(!failLog.equals("")) {
+                KTCloudOpenAPI.LOGGER.trace(failLog);
+            }
             return false;
         } else {
-            System.out.println(successLog);
-            //System.out.println( jsonResult.getString("response") );
+            KTCloudOpenAPI.LOGGER.trace(successLog);
             return true;
         }
     }
@@ -61,8 +60,7 @@ class ResponseParser {
     static String getProjectIdFromToken(String result) throws Exception {
         JSONObject jsonResult = new JSONObject(result);
         if (400 <= jsonResult.getInt("statusCode") && jsonResult.getInt("statusCode") < 600) {
-            // fail logic should be here
-            System.out.println(jsonResult.getInt("statusCode"));
+            KTCloudOpenAPI.LOGGER.trace("token issued failed");
             throw new Exception();
         } else {
             return jsonResult.getString("projectID");
@@ -111,6 +109,7 @@ class ResponseParser {
             staticNAT_ID = nc_enablestaticnatresponse.getString("id");
             return staticNAT_ID;
         } else {
+            KTCloudOpenAPI.LOGGER.trace("static NAT creation failed");
             throw new Exception();
         }
     }
@@ -176,7 +175,7 @@ class ResponseParser {
             }
 
             if (maximumWaitingTime <= waitingCount) {
-                System.out.print(log+" failed");
+                KTCloudOpenAPI.LOGGER.trace(log+" failed");
                 return false;
             }
 
@@ -211,7 +210,7 @@ class ResponseParser {
             }
 
             if (maximumWaitingTime <= waitingCount) {
-                System.out.print(log+" failed");
+                KTCloudOpenAPI.LOGGER.trace(log+" failed");
                 throw new Exception();
             }
 

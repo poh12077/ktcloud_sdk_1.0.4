@@ -24,7 +24,7 @@ public class App {
 //            KTCloudOpenAPI.init(confPath,"infra.op@solbox.com", "xJd*Qv*cBXpd7qX");
 
         } catch (Exception e) {
-            System.out.println(e);
+            KTCloudOpenAPI.LOGGER.trace(e.toString());
         }
     }
 }

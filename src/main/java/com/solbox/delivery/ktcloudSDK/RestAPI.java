@@ -56,7 +56,8 @@ class RestAPI {
         }
         bufferedReader.close();
         String responseBody = stringBuffer.toString();
-        System.out.println(statusCode + " " + responseBody);
+        //System.out.println(statusCode + " " + responseBody);
+        KTCloudOpenAPI.LOGGER.debug(statusCode + " " + responseBody);
         String projectID = ResponseParser.projectIDParser(responseBody);
 
         String token = connection.getHeaderField("X-Subject-Token");
@@ -94,7 +95,8 @@ class RestAPI {
         }
         bufferedReader.close();
         String responseBody = stringBuffer.toString();
-        System.out.println(statusCode + " " + responseBody);
+        //System.out.println(statusCode + " " + responseBody);
+        KTCloudOpenAPI.LOGGER.debug(statusCode + " " + responseBody);
 
         JSONObject result = new JSONObject();
         result.put("statusCode", statusCode);
@@ -158,7 +160,8 @@ class RestAPI {
         CloseableHttpResponse httpResponse = client.execute(httpGet);
         int statusCode = httpResponse.getStatusLine().getStatusCode();
         String responseBody = EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
-        System.out.println(statusCode + " " + responseBody);
+        //System.out.println(statusCode + " " + responseBody);
+        KTCloudOpenAPI.LOGGER.debug(statusCode + " " + responseBody);
         JSONObject result = new JSONObject();
         result.put("statusCode", statusCode);
         result.put("response",  responseBody);
@@ -184,7 +187,8 @@ class RestAPI {
         int statusCode = response.getStatusLine().getStatusCode();
 
         String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8");
-        System.out.println(statusCode + " " + responseBody);
+        //System.out.println(statusCode + " " + responseBody);
+        KTCloudOpenAPI.LOGGER.debug(statusCode + " " + responseBody);
         JSONObject result = new JSONObject();
         result.put("statusCode", statusCode);
         result.put("response", responseBody);
@@ -209,7 +213,8 @@ class RestAPI {
         int statusCode = response.getStatusLine().getStatusCode();
 
         String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8");
-        System.out.println(statusCode + " " + responseBody);
+        //System.out.println(statusCode + " " + responseBody);
+        KTCloudOpenAPI.LOGGER.debug(statusCode + " " + responseBody);
         String projectID = ResponseParser.projectIDParser(responseBody);
 
         JSONObject result = new JSONObject();
@@ -236,7 +241,8 @@ class RestAPI {
         int statusCode = response.getStatusLine().getStatusCode();
 
         String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8");
-        System.out.println(statusCode + " " + responseBody);
+        //System.out.println(statusCode + " " + responseBody);
+        KTCloudOpenAPI.LOGGER.debug(statusCode + " " + responseBody);
         JSONObject result = new JSONObject();
         result.put("statusCode", statusCode);
         result.put("response", responseBody);

@@ -22,6 +22,7 @@ class ResourceHandler {
         String response = ResponseParser.statusCodeParser(result);
         String vmId = ResponseParser.VmCreateResponseParser(response);
         Etc.check(vmId);
+        KTCloudOpenAPI.LOGGER.trace("VM creation has started");
         return vmId;
     }
 
@@ -32,6 +33,7 @@ class ResourceHandler {
         String response = ResponseParser.statusCodeParser(result);
         String volumeID = ResponseParser.volumeCreateResponseParser(response);
         Etc.check(volumeID);
+        KTCloudOpenAPI.LOGGER.trace("volume creation has started");
         return volumeID;
     }
 
@@ -64,6 +66,7 @@ class ResourceHandler {
         String response = ResponseParser.statusCodeParser(result);
         String staticNatId = ResponseParser.staticNATSettingResponseParser(response);
         Etc.check(staticNatId);
+        KTCloudOpenAPI.LOGGER.trace("static NAT has been created");
         return staticNatId;
     }
 
@@ -76,7 +79,7 @@ class ResourceHandler {
             String response = ResponseParser.statusCodeParser(result);
             String firewallJobId = ResponseParser.firewallJobIdParser(response);
             Etc.check(firewallJobId);
-            boolean isFirewallOpened = ResponseParser.lookupJobId(firewallJobId, token, timeout, count, "firewall activation", maximumWatingTimeGenerally, requestCycle);
+            boolean isFirewallOpened = ResponseParser.lookupJobId(firewallJobId, token, timeout, count,  "(port " + startPort + ") firewall activation", maximumWatingTimeGenerally, requestCycle);
             if (isFirewallOpened) {
                 return firewallJobId;
             }
@@ -85,14 +88,14 @@ class ResourceHandler {
             Thread.sleep(requestCycle * 1000);
 
             if (maximumWatingTimeGenerally <= count) {
-                System.out.print("firewall activation has failed");
+                KTCloudOpenAPI.LOGGER.trace("(port " + startPort + ") firewall activation has failed");
                 throw new Exception();
             }
         }
     }
 
     static boolean checkVmCreationStatus(String vmDetailUrl, String token, String vmId, int timeout, int maximumWaitingTime, int requestCycle) throws Exception {
-        System.out.println("VM creation is in progress ");
+        //KTCloudOpenAPI.LOGGER.trace("VM creation is in progress ");
         int count = 0;
         while (true) {
             String result = RestAPI.get(vmDetailUrl + vmId, token, timeout);
@@ -101,12 +104,12 @@ class ResourceHandler {
             JSONObject server = fianlJsonObject.getJSONObject("server");
             int power_state = server.getInt("OS-EXT-STS:power_state");
             if (power_state == 1) {
-                System.out.println("VM has been created");
+                KTCloudOpenAPI.LOGGER.trace("VM has been created");
                 return true;
             }
             Thread.sleep(requestCycle * 1000);
             count++;
-            System.out.print(count + " ");
+            //KTCloudOpenAPI.LOGGER.trace("timer "+count);
 
             if (maximumWaitingTime <= count) {
                 return false;
@@ -115,7 +118,7 @@ class ResourceHandler {
     }
 
     static boolean checkVolumeCreationStatus(String volumeStatusCheck, String token, String volumeId, String projectId, int timeout, int maximumWaitingTime, int requestCycle) throws Exception {
-        System.out.println("volume creation is in progress ");
+        //KTCloudOpenAPI.LOGGER.trace("volume creation is in progress ");
         int count = 0;
         while (true) {
             String result = RestAPI.get(volumeStatusCheck + projectId + "/volumes/" + volumeId, token, timeout);
@@ -124,12 +127,13 @@ class ResourceHandler {
             JSONObject volume = fianlJsonObject.getJSONObject("volume");
             String status = volume.getString("status");
             if (status.equals("available")) {
-                System.out.println("volume has been created");
+                KTCloudOpenAPI.LOGGER.trace("volume has been created");
                 return true;
             }
             Thread.sleep(requestCycle * 1000);
             count++;
-            System.out.print(count + " ");
+            //KTCloudOpenAPI.LOGGER.trace("timer "+count);
+
 
             if (maximumWaitingTime <= count) {
                 return false;
@@ -147,9 +151,10 @@ class ResourceHandler {
             String requestBody = RequestBody.forceDeleteVm();
             String result = RestAPI.post(KTCloudOpenAPI.forceDeleteVm_URL + serverID + "/action", token, requestBody,
                     timeout);
-            return ResponseParser.statusCodeParserInDeletion(result, "VM deletion is in progress", "VM deletion failed");
+            return ResponseParser.statusCodeParserInDeletion(result, "VM deletion has started", "VM deletion failed");
         } catch (Exception e) {
-            System.out.println(e);
+            KTCloudOpenAPI.LOGGER.trace("VM deletion failed");
+            KTCloudOpenAPI.LOGGER.trace(e.toString());
             return false;
         }
     }
@@ -160,25 +165,27 @@ class ResourceHandler {
                 KTCloudOpenAPI.LOGGER.trace("no volume id");
                 return false;
             }
+            KTCloudOpenAPI.LOGGER.trace("volume deletion has started");
             int count = 0;
             while (true) {
                 String result = RestAPI.delete(KTCloudOpenAPI.deleteVolume_URL + projectID + "/volumes/" + volumeID, token,
                         timeout);
-                if (ResponseParser.statusCodeParserInDeletion(result, "volume deletion is in progress", "waiting for VM deletion")) {
+                if (ResponseParser.statusCodeParserInDeletion(result, "VM has been deleted & volume deletion has started", "")) {
                     return true;
                 } else {
-                    System.out.print(count + " ");
+                    //System.out.print(count + " ");
                 }
                 count++;
                 Thread.sleep(requestCycle * 1000);
 
                 if (maximumWaitingTime <= count) {
-                    System.out.print("Volume deletion error");
+                    KTCloudOpenAPI.LOGGER.trace("volume deletion failed");
                     return false;
                 }
             }
         } catch (Exception e) {
-            System.out.println(e);
+            KTCloudOpenAPI.LOGGER.trace("volume deletion failed");
+            KTCloudOpenAPI.LOGGER.trace(e.toString());
             return false;
         }
     }
@@ -211,12 +218,12 @@ class ResourceHandler {
                 Thread.sleep(requestCycle * 1000);
 
                 if (maximumWaitingTime <= count) {
-                    System.out.print("static NAT deletion has failed");
+                    KTCloudOpenAPI.LOGGER.trace("static NAT deletion has failed");
                     return false;
                 }
             }
         } catch (Exception e) {
-            System.out.println(e);
+            KTCloudOpenAPI.LOGGER.trace(e.toString());
             return false;
         }
     }
@@ -242,18 +249,18 @@ class ResourceHandler {
                         return true;
                     }
                 } else {
-                    System.out.print(count + " ");
+                    //System.out.print(count + " ");
                 }
                 count++;
                 Thread.sleep(requestCycle * 1000);
 
                 if (maximumWaitingTime <= count) {
-                    System.out.print("public IP deletion has failed");
+                    KTCloudOpenAPI.LOGGER.trace("public IP deletion has failed");
                     return false;
                 }
             }
         } catch (Exception e) {
-            System.out.println(e);
+            KTCloudOpenAPI.LOGGER.trace(e.toString());
             return false;
         }
     }
@@ -282,12 +289,12 @@ class ResourceHandler {
                 Thread.sleep(requestCycle * 1000);
 
                 if (maximumWaitingTime <= count) {
-                    System.out.print("disabling firewall has failed");
+                    KTCloudOpenAPI.LOGGER.trace("disabling firewall has failed");
                     return false;
                 }
             }
         } catch (Exception e) {
-            System.out.println(e);
+            KTCloudOpenAPI.LOGGER.trace(e.toString());
             return false;
         }
     }

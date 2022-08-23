@@ -58,8 +58,10 @@ public class KTCloudOpenAPI {
             result = RestAPI.post(getToken_URL, RequestBody.getToken(accountId, accountPassword), timeout);
             String token = ResponseParser.statusCodeParser(result);
             Etc.check(token);
+            LOGGER.trace("token has been issued");
             String projectId = ResponseParser.getProjectIdFromToken(result);
             Etc.check(projectId);
+            LOGGER.trace("project id has been issued");
             serverInformation.setProjectId(projectId);
             String vmId = ResourceHandler.getVm(getVm_URL, token, serverName, serverImage, specs, timeout);
             serverInformation.setVmId(vmId);
@@ -70,7 +72,7 @@ public class KTCloudOpenAPI {
             if (isVmCreated) {
                 vmPrivateIp = ResponseParser.lookupVmPrivateIp(VmDetail_URL, token, vmId, timeout);
             } else {
-                System.out.println("vm creation error");
+                LOGGER.trace("vm creation error");
                 deleteServer(serverInformation, timeout, accountId, accountPassword);
                 throw new Exception();
             }
@@ -83,10 +85,14 @@ public class KTCloudOpenAPI {
                     destinationNetworkAddress, protocol, destinationNetworkId, timeout, maximumWatingTimeGenerally, requestCycle);
             serverInformation.setFirewallJobIdOfOutputPort(firewallJobIdOfOutputPort);
 
-            System.out.println("server creation is done");
+            LOGGER.trace("server has been created");
             return serverInformation;
         } catch (Exception e) {
+            LOGGER.trace(e.toString());
+            LOGGER.trace("server creation failed");
+            LOGGER.trace("rollback has been started");
             KTCloudOpenAPI.deleteServer(serverInformation, timeout, accountId, accountPassword);
+            LOGGER.trace("rollback has been done");
             throw new Exception();
         }
     }
@@ -104,7 +110,7 @@ public class KTCloudOpenAPI {
             int maximumWatingTimeForVm = 500;
             int requestCycle=1;
 
-            System.out.println("Server creation has started");
+            LOGGER.trace("Server creation has started");
 
             serverInformation.setNetworkId(networkId);
             // token
@@ -126,7 +132,7 @@ public class KTCloudOpenAPI {
             if (isVmCreated && isVolumeCreated ) {
                 ResourceHandler.connectVmAndVolume(connectVmAndVolume_URL, token, vmId, volumeId, timeout);
             } else {
-                System.out.println("vm or volume creation error");
+                LOGGER.trace("vm or volume creation error");
                 deleteServer(serverInformation, timeout, accountId, accountPassword);
                 throw new Exception();
             }
@@ -141,10 +147,14 @@ public class KTCloudOpenAPI {
                     destinationNetworkAddress, protocol, destinationNetworkId, timeout, maximumWatingTimeGenerally, requestCycle);
             serverInformation.setFirewallJobIdOfOutputPort(firewallJobIdOfOutputPort);
 
-            System.out.println("server creation is done");
+            LOGGER.trace("server has been created");
             return serverInformation;
         } catch (Exception e) {
+            LOGGER.trace(e.toString());
+            LOGGER.trace("server creation failed");
+            LOGGER.trace("rollback has been started");
             KTCloudOpenAPI.deleteServer(serverInformation, timeout, accountId, accountPassword);
+            LOGGER.trace("rollback has been done");
             throw new Exception();
         }
     }
@@ -161,11 +171,12 @@ public class KTCloudOpenAPI {
         int requestCycle=1;
 
         try {
-            System.out.println("Server deletion has started");
+            LOGGER.trace("server deletion has started");
             // token
             String response = RestAPI.post(getToken_URL, RequestBody.getToken(accountId, accountPassword), timeout);
             String token = ResponseParser.statusCodeParser(response);
             Etc.check(token);
+            LOGGER.trace("token has been issued");
             isVmDeleleted = ResourceHandler.deleteVmOnly(serverInformation.getVmId(), token, timeout);
             isVolumeDeleleted = ResourceHandler.deleteVolume(serverInformation.getVolumeId(), serverInformation.getProjectId(), token, timeout, maximumWatingTimeGenerally, requestCycle);
             isFirewallOfInputPortCloseed = ResourceHandler.closeFirewall(serverInformation.getFirewallJobIdOfInputPort(), token, timeout, maximumWatingTimeGenerally, requestCycle);
@@ -173,7 +184,7 @@ public class KTCloudOpenAPI {
             isStaticNatDisabled = ResourceHandler.deleteStaticNat(serverInformation.getStaticNatId(), token, timeout, maximumWatingTimeGenerally, requestCycle);
             isPublicIpDeleleted = ResourceHandler.deletePublicIp(serverInformation.getPublicIpId(), token, timeout, maximumWatingTimeGenerally, requestCycle);
 
-            System.out.println("server deletion is done");
+            LOGGER.trace("server has been deleted");
 
             JSONObject result = new JSONObject();
             result.put("isVmDeleleted", isVmDeleleted);
@@ -182,12 +193,11 @@ public class KTCloudOpenAPI {
             result.put("isFirewallOfOutputPortCloseed", isFirewallOfOutputPortCloseed);
             result.put("isStaticNatDisabled", isStaticNatDisabled);
             result.put("isVolumeDeleleted", isVolumeDeleleted);
-            System.out.println(result);
+            LOGGER.trace(result.toString());
             return result.toString();
         } catch (Exception e) {
-            System.out.println(e);
             LOGGER.trace("server deletion failed");
-
+            LOGGER.trace(e.toString());
             JSONObject result = new JSONObject();
             result.put("isVmDeleleted", isVmDeleleted);
             result.put("isPublicIpDeleleted", isPublicIpDeleleted);
@@ -195,7 +205,7 @@ public class KTCloudOpenAPI {
             result.put("isFirewallOfOutputPortCloseed", isFirewallOfOutputPortCloseed);
             result.put("isStaticNatDisabled", isStaticNatDisabled);
             result.put("isVolumeDeleleted", isVolumeDeleleted);
-            System.out.println(result);
+            LOGGER.trace(result.toString());
             return result.toString();
         }
     }
